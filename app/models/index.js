@@ -9,5 +9,6 @@ db.url = dbConfig.url
 db.users = require('./user.model')(mongoose)
 db.projects = require('./project.model')(mongoose)
 db.members = require('./member.model')(mongoose)
+db.resources = require('./resource.model')(mongoose)
 
 module.exports = db
