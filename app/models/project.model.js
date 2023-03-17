@@ -6,7 +6,7 @@ module.exports = mongoose => {
             project_description: String,
             start_dates: Date,
             end_dates: Date,
-            project_manager_id: Number,
+            project_manager_id: { type: mongoose.Schema.Types.Number, ref: 'members' },
             status: String
         }
     )
