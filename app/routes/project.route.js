@@ -4,7 +4,7 @@ module.exports = (app) => {
 
     
     router.get('/', projects.getProjects)
-    router.get('/:project_id', projects.getProjectById)
+    router.get('/:id', projects.getProjectById)
     router.put('/:id', projects.updateProjectById)
     router.delete('/:id', projects.deleteProjectById)
     router.post('/', projects.createProject)
