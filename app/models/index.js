@@ -10,5 +10,6 @@ db.users = require('./user.model')(mongoose)
 db.projects = require('./project.model')(mongoose)
 db.members = require('./member.model')(mongoose)
 db.resources = require('./resource.model')(mongoose)
+db.invoices = require('./invoice.model')(mongoose)
 
 module.exports = db

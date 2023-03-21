@@ -1,5 +1,5 @@
 module.exports = mongoose => {
-    const schema = mongoose.Schema(
+    const MemberSchema = mongoose.Schema(
         {
             id: Number,
             name: String,
@@ -9,12 +9,12 @@ module.exports = mongoose => {
         }
     )
 
-    schema.method("toJSON", function() {
+    MemberSchema.method("toJSON", function() {
         const {__v, _id, ...object} = this.toObject()
         object.id = _id;
         return object
     })
 
-    const Member = mongoose.model("members", schema)
+    const Member = mongoose.model("members", MemberSchema)
     return Member
 }

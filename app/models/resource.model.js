@@ -1,5 +1,5 @@
 module.exports = mongoose => {
-    const schema = mongoose.Schema(
+    const ResourceSchema = mongoose.Schema(
         {
             id: Number,
             name: String,
@@ -8,12 +8,12 @@ module.exports = mongoose => {
         }
     )
 
-    schema.method("toJSON", function() {
+    ResourceSchema.method("toJSON", function() {
         const {__v, _id, ...object} = this.toObject()
         object.id = _id;
         return object
     })
 
-    const Resource = mongoose.model("resources", schema)
+    const Resource = mongoose.model("resources", ResourceSchema)
     return Resource
 }

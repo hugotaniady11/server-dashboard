@@ -1,7 +1,6 @@
 const db = require('../models')
 const Project = db.projects
 const Member = db.members
-const mongoose = require('mongoose');
 
 exports.getProjects = async (req, res) => {
   try {
