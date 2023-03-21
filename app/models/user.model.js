@@ -4,6 +4,10 @@ module.exports = mongoose => {
             email: String,
             username: String,
             password: String,
+            createdAt: {
+                type: Date,
+                default: Date.now,
+              },
         }
     )
 
