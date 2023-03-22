@@ -1,5 +1,6 @@
 const db = require('../models')
 const Member = db.members
+const Project = db.projects
 
 // const generateMemberId = () => {
 //     const id = Math.floor(Math.random() * 10000); // generate a random number between 0 and 9999
@@ -8,10 +9,10 @@ const Member = db.members
 
 exports.createMember = async (req, res) => {
     try {
-        let id;
+        let member_id;
         do {
-            id = Math.floor(Math.random() * 10000);
-        } while (await Member.findOne({ id }));
+            member_id = Math.floor(Math.random() * 10000);
+        } while (await Member.findOne({ member_id }));
 
         const { name, email, jobTitle, department } = req.body
 
@@ -24,7 +25,7 @@ exports.createMember = async (req, res) => {
         }
 
         const newMember = new Member({
-            id,
+            member_id,
             name,
             email,
             jobTitle,
@@ -33,7 +34,7 @@ exports.createMember = async (req, res) => {
 
         await newMember.save();
 
-        res.status(201).json({ message: 'Member created', data: { id, name, email, jobTitle, department } });
+        res.status(201).json({ message: 'Member created', data: { member_id, name, email, jobTitle, department } });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Server Error' });
@@ -42,44 +43,38 @@ exports.createMember = async (req, res) => {
 
 exports.getMembers = async (req, res) => {
     try {
-        const members = await Member.find();
-        const formattedMembers = members.map((member) => ({
-            id: member.id,
-            name: member.name,
-            email: member.email,
-            jobTitle: member.jobTitle,
-            department: member.department,
-        }));
-        res.status(200).json(formattedMembers);
+        const members = await Member.find().populate("project_manager");
+        res.status(200).json(members);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Server Error' });
+        res.status(500).json({ message: "Server Error" });
     }
 
 };
 
 exports.getMemberById = async (req, res) => {
     try {
-        const member = await Member.findOne({ id: req.params.id });
+        const member = await Member.findOne({ member_id: req.params.member_id }).populate("project_manager");
+
         if (!member) {
-            return res.status(404).json({ message: 'Member not found' });
+            return res.status(404).json({ message: "Member not found" });
         }
-        const { name, email, jobTitle, department } = member;
-        res.status(200).json({ id: req.params.id, name, email, jobTitle, department });
+
+        res.status(200).json(member);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Server Error' });
+        res.status(500).json({ message: "Server Error" });
     }
 };
 
 exports.updateMemberById = async (req, res) => {
     try {
-        const { id } = req.params;
+        const { member_id } = req.params;
         const { name, email, jobTitle, department } = req.body;
 
         // Find the member by ID and update their information
         const updatedMember = await Member.findOneAndUpdate(
-            { id },
+            { member_id },
             { name, email, jobTitle, department },
             { new: true }
         );
@@ -91,7 +86,7 @@ exports.updateMemberById = async (req, res) => {
 
         const { _id, ...memberData } = updatedMember._doc;
         const response = {
-            id: memberData.id,
+            member_id: memberData.member_id,
             name: memberData.name,
             email: memberData.email,
             jobTitle: memberData.jobTitle,
@@ -108,10 +103,10 @@ exports.updateMemberById = async (req, res) => {
 };
 
 exports.deleteMemberById = async (req, res) => {
-    const memberId = req.params.id;
+    const memberId = req.params.member_id;
 
     try {
-        const deletedMember = await Member.findOneAndDelete({ id: memberId });
+        const deletedMember = await Member.findOneAndDelete({ member_id: memberId });
 
         if (!deletedMember) {
             return res.status(404).json({ message: `Member with ID ${memberId} not found` });
