@@ -1,11 +1,12 @@
 module.exports = mongoose => {
     const MemberSchema = mongoose.Schema(
         {
-            id: Number,
+            member_id: Number,
             name: String,
             email: String,
             jobTitle: String,
-            department: String
+            department: String,
+            project_manager: [{ type: mongoose.Schema.Types.ObjectId, ref: "projects" }]
         }
     )
 

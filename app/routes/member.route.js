@@ -9,13 +9,13 @@ module.exports = (app) => {
     // Route for retrieving all members
     router.get('/', members.getMembers);
     // Route for retrieving a single member by ID
-    router.get('/:id', members.getMemberById);
+    router.get('/:member_id', members.getMemberById);
 
     // Route for updating a member by ID
-    router.put('/:id', members.updateMemberById);
+    router.put('/:member_id', members.updateMemberById);
 
     // Route for deleting a member by ID
-    router.delete('/:id', members.deleteMemberById);
+    router.delete('/:member_id', members.deleteMemberById);
 
 
     app.use('/api/members', router)

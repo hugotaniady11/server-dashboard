@@ -4,159 +4,114 @@ const Member = db.members
 
 exports.getProjects = async (req, res) => {
   try {
-    const projects = await Project.aggregate([
-      {
-        $lookup: {
-          from: "members",
-          localField: "project_manager_id",
-          foreignField: "id",
-          as: "manager"
-        }
-      },
-      {
-        $unwind: "$manager"
-      },
-      {
-        $project: {
-          id: 1,
-          name: 1,
-          description: 1,
-          start_date: 1,
-          end_date: 1,
-          status: 1,
-          manager: {
-            project_manager_id: "$manager.id",
-            project_manager_name: "$manager.name"
-          }
-        }
-      }
-    ]);
-    res.json({ success: true, projects });
-  } catch (err) {
-    console.error(err);
+    const projects = await Project.find().populate("project_manager_id");
+    res.status(200).json(projects);
+  } catch (error) {
+    console.error(error);
     res.status(500).json({ message: "Server Error" });
   }
 
 }
 
 exports.getProjectById = async (req, res) => {
-  
   try {
-    const project = await Project.findOne({ id: req.params.id });
-    if (!project) {
-      return res.status(404).json({ message: 'Project not found' });
-    }
-    const { name, description, start_dates, end_dates, status, project_manager_name, project_manager_id } = project;
-    return res.status(200).json({
-      id: req.params.id,
-      name,
-      description,
-      start_dates,
-      end_dates,
-      status,
-      project_manager_name,
-      project_manager_id
-    });
+    const project = await Project.findOne({ project_id: req.params.project_id }).populate("project_manager_id");
 
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: 'Server error' });
+    if (!project) {
+      return res.status(404).json({ message: "Project not found" });
+    }
+
+    res.status(200).json(project);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
   }
 
 }
 
 exports.createProject = async (req, res) => {
   try {
-    const { id, name, description, start_dates, end_dates, project_manager_id, status } = req.body;
+    const { project_id, name, description, start_dates, end_dates, status, project_manager_id } = req.body;
 
-    const projectManager = await Member.findOne({ id: project_manager_id }, { name: 1 });
-
-    const existProject = await Project.findOne({
-      $or: [{ id }, { name }],
-  })
-  if (existProject) {
-    return res.status(400).json({
-        message: "Project has been made"
+    const existingName = await Project.findOne({
+      $or: [{ project_id }, { name }]
     })
-}
 
-    const project = new Project({
-      id,
+    if (existingName) {
+      return res.status(400).json({
+        message: "Project has been made"
+      })
+    }
+
+    // Check if the provided project ID exists
+    const existingManager = await Member.findById(project_manager_id);
+    if (!existingManager) {
+      return res.status(400).json({ message: "Project Manager does not exist" });
+    }
+
+    // Create a new invoice object
+    const newProject = new Project({
+      project_id,
       name,
       description,
       start_dates,
       end_dates,
-      project_manager_id,
-      project_manager_name: projectManager.name,
+      project_manager_id: existingManager._id,
       status
     });
 
-    await project.save();
-    res.status(201).json({
-      success: true,
-      message: 'Project created successfully',
-      data: {
-        id: project.id,
-      name: project.name,
-      description: project.description,
-      start_dates: project.start_dates,
-      end_dates: project.end_dates,
-      status: project.status,
-      project_manager_id: project.project_manager_id,
-      project_manager_name: project.project_manager_name
-      }
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server Error' });
-  }
-}
+    // Save the new invoice to the database
+    const savedProject = await newProject.save();
 
-exports.deleteProjectById = async (req, res) => {
-  const projectId = req.params.id;
+    // Populate the project data and return the saved invoice with project data
+    const populatedProject = await Project.findById(savedProject._id).populate("project_manager_id");
 
-  try {
-    const deletedProject = await Project.findOneAndDelete({ id: projectId });
-
-    if (!deletedProject) {
-      return res.status(404).json({ message: `Project with ID ${projectId} not found` });
-    }
-
-    return res.json({ message: `Project with ID ${projectId} successfully deleted` });
-  } catch (error) {
-    return res.status(500).json({ error: error.message });
-  }
-}
-
-exports.updateProjectById = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { name, description, start_dates, end_dates, project_manager_id, status } = req.body;
-
-    const updatedProject = await Project.findOneAndUpdate(
-      { id },
-      { name, description, start_dates, end_dates, project_manager_id, status },
-      { new: true }
-    );
-
-    if (!updatedProject) {
-      return res.status(404).json({ message: 'Project not found' });
-    }
-    const { _id, ...projectData } = updatedProject._doc;
-    const response = {
-      id: projectData.id,
-      name: projectData.name,
-      description: projectData.description,
-      start_dates: projectData.start_dates,
-      end_dates: projectData.end_dates,
-      project_manager_id: projectData.project_manager_id,
-      project_manager_name: projectData.project_manager_name,
-      status: projectData.status
-    };
-
-    return res.json({ message: 'Project updated successfully', data: response });
+    res.status(201).json({success: true, data: populatedProject});
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: 'Server error' });
   }
+}
+
+exports.deleteProjectById = async (req, res) => {
+  const projectId = req.params.project_id;
+    try {
+        const project = await Project.findOneAndDelete({ project_id: projectId });
+
+        if (!project) {
+            return res.status(404).json({ message: `Project with number ${projectId} not found` });
+        }
+
+        res.status(200).json({ message: "Project deleted successfully" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server Error" });
+    }
+}
+
+exports.updateProjectById = async (req, res) => {
+  try {
+    const { project_id, name, description, start_dates, end_dates, status, project_manager_id } = req.body;
+
+    const project = await Project.findOne({ project_id: req.params.project_id });
+
+    if (!project) {
+        return res.status(404).json({ message: "Invoice not found" });
+    }
+
+    project.project_id = project_id || project.project_id;
+    project.name = name || project.name;
+    project.description = description || project.description;
+    project.start_dates = start_dates || project.start_dates;
+    project.end_dates = end_dates || project.end_dates;
+    project.status = status || project.status;
+    project.project_manager_id = project_manager_id || project.project_manager_id;
+
+    await project.save();
+
+    res.status(200).json({ message: "Project updated successfully" });
+} catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+}
 }
