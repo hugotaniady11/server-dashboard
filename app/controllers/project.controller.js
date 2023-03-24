@@ -63,6 +63,10 @@ exports.createProject = async (req, res) => {
     // Save the new invoice to the database
     const savedProject = await newProject.save();
 
+    const member = await Member.findById(project_manager_id);
+    member.project_manager = savedProject._id;
+    await member.save();
+
     // Populate the project data and return the saved invoice with project data
     const populatedProject = await Project.findById(savedProject._id).populate("project_manager_id");
 
