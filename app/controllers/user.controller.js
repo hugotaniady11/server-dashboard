@@ -59,35 +59,35 @@ exports.login = async (req,res) => {
     //     data: findUser,
     // });
 
-    // const accessToken = jwt.sign(
-    //     { userId: findUser._id },
-    //     process.env.ACCESS_TOKEN_SECRET,
-    //     { expiresIn: '30m' }
-    //   );
+    const accessToken = jwt.sign(
+        { userId: findUser._id },
+        process.env.ACCESS_TOKEN_SECRET,
+        { expiresIn: '30m' }
+      );
       
   
       res.status(200).json({ 
         message: "User logged in",
-        // token: accessToken
+        token: accessToken
     });
 };
 
-// exports.authMiddleware = async (req, res, next) => {
-//   try {
-//     const token = req.headers.authorization.split(' ')[1];
-//     const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-//     const user = await User.findById(decodedToken.userId);
+exports.authMiddleware = async (req, res, next) => {
+  try {
+    const token = req.headers.authorization.split(' ')[1];
+    const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    const user = await User.findById(decodedToken.userId);
 
-//     if (!user) {
-//       return res.status(401).json({ message: 'Unauthorized' });
-//     }
+    if (!user) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
 
-//     req.user = user;
-//     next();
-//   } catch (err) {
-//     return res.status(401).json({ message: 'Unauthorized' });
-//   }
-// };
+    req.user = user;
+    next();
+  } catch (err) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+};
 
 
   exports.logout = async (req,res) => {
