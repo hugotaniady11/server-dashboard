@@ -7,12 +7,12 @@ exports.register = async (req,res) => {
     const { email, username, password } = req.body
 
     const findUser = await User.findOne({
-        username
+      $or: [{ email }, { username }]
     })
 
     if (findUser) {
         return res.status(400).json({
-            message: "Username has been taken"
+            message: "Email or Username has been taken"
         })
     }
 
@@ -28,7 +28,7 @@ exports.register = async (req,res) => {
    
 
     res.status(201).json({
-        user: registeredUser, message: "User registered!"
+        message: "User registered!"
     })
 
 }
