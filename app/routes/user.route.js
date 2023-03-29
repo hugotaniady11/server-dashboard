@@ -4,7 +4,8 @@ module.exports = (app) => {
 
     router.post('/register', users.register)
     router.post('/login', users.login)
-    router.post('/logout', users.authMiddleware, users.logout)
+    router.delete('/logout', users.logout)
+    router.get('/profile', users.authMiddleware, users.profile)
     
     
 
