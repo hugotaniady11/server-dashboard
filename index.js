@@ -44,6 +44,7 @@ require('./app/routes/member.route')(app)
 require('./app/routes/project.route')(app)
 require('./app/routes/resource.route')(app)
 require('./app/routes/invoice.route')(app)
+require('./app/routes/department.route')(app)
 
 app.listen(PORT, () => {
     console.log(`server is running on http://localhost:${PORT}`)
