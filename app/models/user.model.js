@@ -4,6 +4,7 @@ module.exports = mongoose => {
             email: String,
             username: String,
             password: String,
+            account_type: String,
             createdAt: {
                 type: Date,
                 default: Date.now,

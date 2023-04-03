@@ -4,7 +4,7 @@ const bcrypt = require("bcrypt")
 const jwt = require('jsonwebtoken')
 
 exports.register = async (req, res) => {
-  const { email, username, password } = req.body
+  const { email, username, account_type, password } = req.body
 
   const findUser = await User.findOne({
     $or: [{ email }, { username }]
@@ -22,6 +22,7 @@ exports.register = async (req, res) => {
   const registeredUser = await User.create({
     email: email,
     username: username,
+    account_type: account_type,
     password: hashedPassword
   })
 
@@ -112,7 +113,7 @@ exports.generateToken = (user) => {
       email: user.email,
     },
     process.env.JWT_SECRET,
-    { expiresIn: '1h' }
+    { expiresIn: '30m' }
   );
   const refreshToken = jwt.sign(
     {
@@ -120,7 +121,7 @@ exports.generateToken = (user) => {
       email: user.email,
     },
     process.env.JWT_REFRESH_SECRET,
-    { expiresIn: '7d' }
+    { expiresIn: '1h' }
   );
   return { token, refreshToken };
 };
@@ -130,6 +131,7 @@ exports.profile = async (req, res) => {
     userId : req.user._id,
     username: req.user.username,
     email: req.user.email,
+    account_type: req.account_type
   };
 
   res.json(user);
