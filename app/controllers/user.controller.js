@@ -73,7 +73,7 @@ exports.login = async (req, res) => {
   );
 
   const refreshToken = jwt.sign(
-    { userId: findUser._id, email: findUser.email, username: findUser.username },
+    { userId: findUser._id, email: findUser.email, username: findUser.username, account_type: findUser.account_type },
     process.env.ACCESS_TOKEN_SECRET
   );
 
@@ -111,6 +111,7 @@ exports.generateToken = (user) => {
     {
       id: user.id,
       email: user.email,
+      account_type: user.account_type
     },
     process.env.JWT_SECRET,
     { expiresIn: '30m' }
@@ -119,6 +120,7 @@ exports.generateToken = (user) => {
     {
       id: user.id,
       email: user.email,
+      account_type: user.account_type
     },
     process.env.JWT_REFRESH_SECRET,
     { expiresIn: '1h' }
@@ -131,7 +133,7 @@ exports.profile = async (req, res) => {
     userId : req.user._id,
     username: req.user.username,
     email: req.user.email,
-    account_type: req.account_type
+    account_type: req.user.account_type
   };
 
   res.json(user);
