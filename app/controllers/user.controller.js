@@ -74,7 +74,7 @@ exports.login = async (req, res) => {
 
   const refreshToken = jwt.sign(
     { userId: findUser._id, email: findUser.email, username: findUser.username, account_type: findUser.account_type },
-    process.env.ACCESS_TOKEN_SECRET
+    process.env.REFRESH_TOKEN_SECRET
   );
 
   // save refresh token to database
