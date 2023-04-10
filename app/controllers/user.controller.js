@@ -74,7 +74,8 @@ exports.login = async (req, res) => {
 
   const refreshToken = jwt.sign(
     { userId: findUser._id, email: findUser.email, username: findUser.username, account_type: findUser.account_type },
-    process.env.REFRESH_TOKEN_SECRET
+    process.env.REFRESH_TOKEN_SECRET,
+    { expiresIn: '7h' }
   );
 
   // save refresh token to database
@@ -123,7 +124,7 @@ exports.generateToken = (user) => {
       account_type: user.account_type
     },
     process.env.JWT_REFRESH_SECRET,
-    { expiresIn: '1h' }
+    { expiresIn: '7h' }
   );
   return { token, refreshToken };
 };
