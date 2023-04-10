@@ -28,15 +28,9 @@ exports.createResource = async (req, res) => {
 }
 
 exports.getResources = async (req, res) => {
-    let { page, limit, sort, asc } = req.query;
-    const skip = (page - 1 ) * 10;
-    if(!page) page = 1;
-    if(!limit) limit = 10;
-
-
     try {
 
-        const resources = await Resource.find().sort({ [sort] : asc }).skip(skip).limit(limit);
+        const resources = await Resource.find();
         const formattedResources = resources.map((resource) => ({
             id: resource.id,
             name: resource.name,
@@ -46,7 +40,7 @@ exports.getResources = async (req, res) => {
 
 
 
-        res.status(200).json({ resources: formattedResources, page:page, limit:limit });
+        res.status(200).json({ resources: formattedResources});
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server Error' });
