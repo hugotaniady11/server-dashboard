@@ -2,20 +2,40 @@ const express = require('express')
 const bodyParser = require('body-parser');
 const dotenv = require('dotenv')
 const cors = require("cors")
-const corsOptions ={
-    origin:'*', 
-    credentials:true,    
-    optionSuccessStatus:200,
- }
+const corsOptions = {
+    origin: '*',
+    credentials: true,
+    optionSuccessStatus: 200,
+}
 const app = express()
 const path = require('path')
 require('dotenv').config();
 const PORT = process.env.PORT || 8000
+const multer = require('multer');
 
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'images');
+    },
+    filename: (req, file, cb) => {
+        cb(null, new Date().getTime() + '-' + file.originalname);
+    },
+});
+const filter = (req, file, cb) => {
+    if (file.mimetype === 'image/png' || file.mimetype === 'image/jpg' || file.mimetype === 'image/jpeg') {
+        cb(null, true);
+    }
+    else {
+        cb(null, false);
+    }
+
+}
+app.use('/images', express.static(path.join(__dirname, 'images')))
+app.use(multer({ storage: storage, filter: filter }).single('image'))
 app.use(cors(corsOptions))
 app.use(express.json())
 app.use(bodyParser.json());
-app.use(express.urlencoded({ extended: true}))
+app.use(express.urlencoded({ extended: true }))
 
 const db = require('./app/models');
 db.mongoose.set("strictQuery", false);
@@ -24,15 +44,15 @@ db.mongoose
         useNewUrlParser: true,
         useUnifiedTopology: true
     })
-    .then((res)=> {
+    .then((res) => {
         console.log('Database connected')
     }).catch((err) => {
         console.log("Cannot connect to database!", err)
         process.exit()
     })
 
-    
-app.get('/', (req,res) => {
+
+app.get('/', (req, res) => {
     res.json({
         status: 200,
         message: 'Welcome to server'

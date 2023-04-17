@@ -2,7 +2,6 @@ module.exports = (app) => {
     const members = require('../controllers/member.controller')
     const router = require('express').Router()
 
-
     // Route for creating a new member
     router.post('/', members.createMember);
 
