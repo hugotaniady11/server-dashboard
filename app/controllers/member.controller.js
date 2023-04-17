@@ -1,6 +1,8 @@
 const db = require('../models')
 const Member = db.members
 const Project = db.projects
+const path = require('path')
+const fs = require('fs')
 
 // const generateMemberId = () => {
 //     const id = Math.floor(Math.random() * 10000); // generate a random number between 0 and 9999
@@ -14,7 +16,8 @@ exports.createMember = async (req, res) => {
             member_id = Math.floor(Math.random() * 10000);
         } while (await Member.findOne({ member_id }));
 
-        const { name, email, jobTitle, department } = req.body
+        const { name, email, jobTitle, department } = req.body;
+        const image = req.file.path;
 
         const existingMember = await Member.findOne({
             $or: [{ email }, { name }],
@@ -24,17 +27,19 @@ exports.createMember = async (req, res) => {
             return res.status(400).json({ error: 'Email or name already taken' });
         }
 
-        const newMember = new Member({
-            member_id,
-            name,
-            email,
-            jobTitle,
-            department,
-        });
+            const newMember = new Member({
+                member_id,
+                name,
+                email,
+                jobTitle,
+                department,
+                image,
+            });
 
-        await newMember.save();
+            await newMember.save();
 
-        res.status(201).json({ message: 'Member created', data: { member_id, name, email, jobTitle, department } });
+            res.status(201).json({ message: 'Member created', data: { member_id, name, email, jobTitle, department, image } });
+
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Server Error' });
@@ -75,7 +80,7 @@ exports.updateMemberById = async (req, res) => {
         // Find the member by ID and update their information
         const updatedMember = await Member.findOneAndUpdate(
             { member_id },
-            { name, email, jobTitle, department },
+            { name, email, jobTitle, department, image: req.file.path },
             { new: true }
         );
 
@@ -91,6 +96,7 @@ exports.updateMemberById = async (req, res) => {
             email: memberData.email,
             jobTitle: memberData.jobTitle,
             department: memberData.department,
+            image: memberData.image,
         };
 
 
@@ -104,6 +110,7 @@ exports.updateMemberById = async (req, res) => {
 
 exports.deleteMemberById = async (req, res) => {
     const memberId = req.params.member_id;
+    // const image = req.file.path;
 
     try {
         const deletedMember = await Member.findOneAndDelete({ member_id: memberId });
@@ -111,9 +118,14 @@ exports.deleteMemberById = async (req, res) => {
         if (!deletedMember) {
             return res.status(404).json({ message: `Member with ID ${memberId} not found` });
         }
-
+        removeImage(deletedMember.image);
         return res.json({ message: `Member with ID ${memberId} successfully deleted` });
     } catch (error) {
         return res.status(500).json({ error: error.message });
     }
 };
+
+const removeImage = (filePath) => {
+    filePath = path.join(__dirname, '../..' , filePath);
+    fs.unlink(filePath, err => {console.log(err)});
+}
