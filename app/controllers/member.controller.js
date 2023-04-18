@@ -17,6 +17,11 @@ exports.createMember = async (req, res) => {
         } while (await Member.findOne({ member_id }));
 
         const { name, email, jobTitle, department } = req.body;
+        
+        if (!req.file) {
+            return res.status(400).json({ error: 'No file uploaded' });
+        }
+
         const image = req.file.path;
 
         const existingMember = await Member.findOne({

@@ -14,24 +14,33 @@ const PORT = process.env.PORT || 8000
 const multer = require('multer');
 
 const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'images');
+    destination: function(req, file, cb) {
+      let dest;
+      if (file.mimetype === 'application/pdf') {
+        dest = 'files';
+      } else if (file.mimetype === 'image/png' || file.mimetype === 'image/jpg' || file.mimetype === 'image/jpeg') {
+        dest = 'images';
+      } else {
+        return cb(new Error('Unsupported file type'))
+      }
+      cb(null, dest)
     },
-    filename: (req, file, cb) => {
-        cb(null, new Date().getTime() + '-' + file.originalname);
-    },
-});
-const filter = (req, file, cb) => {
-    if (file.mimetype === 'image/png' || file.mimetype === 'image/jpg' || file.mimetype === 'image/jpeg') {
-        cb(null, true);
+    filename: function(req, file, cb) {
+      cb(null, new Date().getTime() + '-' + file.originalname);
     }
-    else {
-        cb(null, false);
+  });
+  
+  const fileFilter = function(req, file, cb) {
+    if (file.mimetype === 'application/pdf' || file.mimetype === 'image/png' || file.mimetype === 'image/jpg' || file.mimetype === 'image/jpeg') {
+      cb(null, true);
+    } else {
+      cb(null, false);
     }
+  };
 
-}
-app.use('/images', express.static(path.join(__dirname, 'images')))
-app.use(multer({ storage: storage, filter: filter }).single('image'))
+app.use('/images', express.static(path.join(__dirname, 'images')));
+app.use('/files', express.static(path.join(__dirname, 'files')));
+app.use(multer({ storage: storage, fileFilter: fileFilter }).single('image'));
 app.use(cors(corsOptions))
 app.use(express.json())
 app.use(bodyParser.json());

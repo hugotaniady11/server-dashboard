@@ -7,6 +7,7 @@ module.exports = mongoose => {
             start_dates: Date,
             end_dates: Date,
             status: String,
+            image: String,
             project_manager_id: { type: mongoose.Schema.Types.ObjectId, ref: "members" }
         }
     )
