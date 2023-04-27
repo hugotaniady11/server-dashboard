@@ -34,7 +34,7 @@ exports.getProjectById = async (req, res) => {
 exports.createProject = async (req, res) => {
   try {
     const { project_id, name, description, start_dates, end_dates, status, project_manager_id } = req.body;
-    const image = req.file.path;
+    const file = req.file.path;
 
     const existingName = await Project.findOne({
       $or: [{ project_id }, { name }]
@@ -61,7 +61,7 @@ exports.createProject = async (req, res) => {
       end_dates,
       project_manager_id: existingManager._id,
       status,
-      image,
+      file,
     });
 
     // Save the new invoice to the database
@@ -100,7 +100,7 @@ exports.deleteProjectById = async (req, res) => {
 exports.updateProjectById = async (req, res) => {
   try {
     const { project_id, name, description, start_dates, end_dates, status, project_manager_id } = req.body;
-    const image = req.file.path;
+    const file = req.file.path;
 
     const project = await Project.findOne({ project_id: req.params.project_id });
 
@@ -114,7 +114,7 @@ exports.updateProjectById = async (req, res) => {
     project.start_dates = start_dates || project.start_dates;
     project.end_dates = end_dates || project.end_dates;
     project.status = status || project.status;
-    project.image = image || project.image;
+    project.file = file || project.file;
     project.project_manager_id = project_manager_id || project.project_manager_id;
 
     await project.save();

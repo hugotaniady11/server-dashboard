@@ -22,7 +22,7 @@ exports.createMember = async (req, res) => {
             return res.status(400).json({ error: 'No file uploaded' });
         }
 
-        const image = req.file.path;
+        const file = req.file.path;
 
         const existingMember = await Member.findOne({
             $or: [{ email }, { name }],
@@ -38,12 +38,12 @@ exports.createMember = async (req, res) => {
                 email,
                 jobTitle,
                 department,
-                image,
+                file,
             });
 
             await newMember.save();
 
-            res.status(201).json({ message: 'Member created', data: { member_id, name, email, jobTitle, department, image } });
+            res.status(201).json({ message: 'Member created', data: { member_id, name, email, jobTitle, department, file } });
 
     } catch (err) {
         console.error(err);
@@ -85,7 +85,7 @@ exports.updateMemberById = async (req, res) => {
         // Find the member by ID and update their information
         const updatedMember = await Member.findOneAndUpdate(
             { member_id },
-            { name, email, jobTitle, department, image: req.file.path },
+            { name, email, jobTitle, department, file: req.file.path },
             { new: true }
         );
 
@@ -101,7 +101,7 @@ exports.updateMemberById = async (req, res) => {
             email: memberData.email,
             jobTitle: memberData.jobTitle,
             department: memberData.department,
-            image: memberData.image,
+            file: memberData.file,
         };
 
 
@@ -115,7 +115,7 @@ exports.updateMemberById = async (req, res) => {
 
 exports.deleteMemberById = async (req, res) => {
     const memberId = req.params.member_id;
-    // const image = req.file.path;
+    // const file = req.file.path;
 
     try {
         const deletedMember = await Member.findOneAndDelete({ member_id: memberId });
@@ -123,14 +123,14 @@ exports.deleteMemberById = async (req, res) => {
         if (!deletedMember) {
             return res.status(404).json({ message: `Member with ID ${memberId} not found` });
         }
-        removeImage(deletedMember.image);
+        removeFile(deletedMember.file);
         return res.json({ message: `Member with ID ${memberId} successfully deleted` });
     } catch (error) {
         return res.status(500).json({ error: error.message });
     }
 };
 
-const removeImage = (filePath) => {
+const removeFile = (filePath) => {
     filePath = path.join(__dirname, '../..' , filePath);
     fs.unlink(filePath, err => {console.log(err)});
 }

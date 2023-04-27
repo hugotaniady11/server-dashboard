@@ -6,7 +6,7 @@ module.exports = mongoose => {
             email: String,
             jobTitle: String,
             department: String,
-            image: String,
+            file: String,
             project_manager: [{ type: mongoose.Schema.Types.ObjectId, ref: "projects" }]
         }
     )
