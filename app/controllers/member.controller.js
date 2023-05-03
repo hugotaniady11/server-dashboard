@@ -16,13 +16,13 @@ exports.createMember = async (req, res) => {
             member_id = Math.floor(Math.random() * 10000);
         } while (await Member.findOne({ member_id }));
 
-        const { name, email, jobTitle, department } = req.body;
+        const { name, email, jobTitle, department, file } = req.body;
         
-        if (!req.file) {
-            return res.status(400).json({ error: 'No file uploaded' });
-        }
+        // if (!req.file) {
+        //     return res.status(400).json({ error: 'No file uploaded' });
+        // }
 
-        const file = req.file.path;
+        // const file = req.file.path;
 
         const existingMember = await Member.findOne({
             $or: [{ email }, { name }],
@@ -80,12 +80,18 @@ exports.getMemberById = async (req, res) => {
 exports.updateMemberById = async (req, res) => {
     try {
         const { member_id } = req.params;
-        const { name, email, jobTitle, department } = req.body;
+        const { name, email, jobTitle, department, file } = req.body;
 
         // Find the member by ID and update their information
         const updatedMember = await Member.findOneAndUpdate(
             { member_id },
-            { name, email, jobTitle, department, file: req.file.path },
+            { 
+                name, 
+                email, 
+                jobTitle, 
+                department, 
+                file
+             },
             { new: true }
         );
 
